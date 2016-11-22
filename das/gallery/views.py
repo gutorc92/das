@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views import View
+from .models import *
 from .forms import FileFieldForm
 from django.conf import settings
 from extern import *
@@ -19,6 +20,7 @@ def handle_uploaded_file(f, name):
 class CreateGallery(View):
 
     def post(self, request):
+        cats, dogs, faces = create_categories()
         files = request.FILES.getlist('file_field')
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
@@ -27,16 +29,13 @@ class CreateGallery(View):
             for (dirpath, dirnames, filenames) in walk(path_img):
                 for f in filenames:
                     print(f)
-                    d = Input(os.path.join(path_img,f))
-                    o.outFaces(face.detect(d.getImage(Input.FACES)))
-                    dogs,cats = n.result(d.getImage(Input.PREDICTION))
-                    o.outAnimals(dogs,cats)
-
-            vectors, img_files = load_dataset(path_img)
-            KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=path_img, labels=labels)
-
-# Freeing memory:
-            del vectors
+                    path_image = os.path.join(path_img,f)
+                    d = Input(path_image)
+                    if len(face.detect(d.getImage(Input.FACES))) > 0:
+                       p = Picture.objects.create(name=f, path=path_image,category=faces)
+                    d, c = n.result(d.getImage(Input.PREDICTION))
+                    o.outAnimals(d,c)
+            
             return self.get(request)
 
         else:
@@ -47,4 +46,9 @@ class CreateGallery(View):
         return render(request, "gallery/create.html",{'form': form})
         
 
+def create_categories():
+   cats,  created = Category.objects.get_or_create(name="Cats")
+   dogs,  created = Category.objects.get_or_create(name="Dogs")
+   faces, created = Category.objects.get_or_create(name="Faces")
+   return cats, dogs, faces
 # Create your views here.

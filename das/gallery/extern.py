@@ -5,6 +5,10 @@ import sys
 import cv2
 import urllib2
 import urllib
+from scipy import misc
+import h5py # to save/load data files
+import matplotlib.pyplot as plt
+
 
 dic_root = "/home/gustavo/Documents/unb/das/trabalhofinal/das/gallery"
 caffe_root = "/home/gustavo/caffe"
@@ -232,6 +236,65 @@ def load_dataset_hist(images_path):
             f.create_dataset('img_files', data=img_files)
     
     return vectors, img_files
+
+def load_dataset(images_path, net, transformer):
+    # Load/build a dataset of vectors (i.e. a big matrix) of probabilities
+    # from the ImageNet ILSVRC 2012 challenge using Caffe.
+    vectors_filename = os.path.join(images_path, 'vectors.h5')
+
+    if os.path.exists(vectors_filename):
+        print 'Loading image signatures (probability vectors) from ' + vectors_filename
+        with h5py.File(vectors_filename, 'r') as f:
+            vectors = f['vectors'][()]
+            img_files = f['img_files'][()]
+
+    else:
+        # Build a list of JPG files (change if you want other image types):
+        os.listdir(images_path)
+        img_files = [f for f in os.listdir(images_path) if (('jpg' in f) or ('JPG') in f)]
+
+        print 'Loading all images to the memory and pre-processing them...'
+        
+        net_data_shape = net.blobs['data'].data.shape
+        train_images = np.zeros(([len(img_files)] + list(net_data_shape[1:])))
+
+        for (f,n) in zip(img_files, range(len(img_files))):
+            print '%d %s'% (n,f)
+            image = caffe.io.load_image(os.path.join(images_path, f))
+            train_images[n] = transformer.preprocess('data', image)
+    
+        print 'Extracting descriptor vector (classifying) for all images...'
+        vectors = np.zeros((train_images.shape[0],1000))
+        for n in range(0,train_images.shape[0],10): # For each batch of 10 images:
+            # This block can/should be parallelised!
+            print 'Processing batch %d' % n
+            last_n = np.min((n+10, train_images.shape[0]))
+
+            net.blobs['data'].data[0:last_n-n] = train_images[n:last_n]
+
+            # perform classification
+            net.forward()
+
+            # obtain the output probabilities
+            vectors[n:last_n] = net.blobs['prob'].data[0:last_n-n]
+        
+        print 'Saving descriptors and file indices to ' + vectors_filename
+        with h5py.File(vectors_filename, 'w') as f:
+            f.create_dataset('vectors', data=vectors)
+            f.create_dataset('img_files', data=img_files)
+    
+    return vectors, img_files
+
+def make():
+    n = Net()
+    img_path = "/home/gustavo/Documents/das/das/images/"
+    labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
+    labels = np.loadtxt(labels_file, str, delimiter='\t') 
+    vectors, img_files = load_dataset(img_path, n.net, n.transformer)
+    img = "/home/gustavo/Documents/das/das/images/2b97481.jpg"
+    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=img_path, labels=labels)
+    del vectors
+    KNN.retrieve(n.predict_imageNet(img)) 
 
 class Input:
 
