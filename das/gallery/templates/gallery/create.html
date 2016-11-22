@@ -1,0 +1,7 @@
+<html>
+    <form action="{% url 'gallery:create' %}" enctype="multipart/form-data" method="POST" >
+        {% csrf_token %} 
+        {{ form }}
+        <button> Enviar </button>
+    </form>
+</html>
