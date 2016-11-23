@@ -10,12 +10,13 @@ import h5py # to save/load data files
 import matplotlib.pyplot as plt
 
 
-dic_root = "/home/gustavo/Documents/unb/das/trabalhofinal/das/gallery"
-caffe_root = "/home/gustavo/caffe"
+home_dir = os.getenv("HOME")
+caffe_root = os.path.join(home_dir, "caffe")
+
 
 class NetFace:
 	def __init__(self):
-		path = os.path.join(dic_root,"haarcascade_frontalface_alt.xml")
+		path = "gallery/haarcascade_frontalface_alt.xml"
 		self.classifier = cv2.CascadeClassifier(path)
 	def classifierImage(self,miniframe):
 		return self.classifier.detectMultiScale(miniframe)
@@ -70,8 +71,8 @@ class Net:
 
 
 	def create_net(self):
-		model_weights = os.path.join(caffe_root, 'models','bvlc_reference_caffenet','bvlc_reference_caffenet.caffemodel')
 		model_def = os.path.join(caffe_root, 'models', 'bvlc_reference_caffenet','deploy.prototxt')
+		model_weights = os.path.join(caffe_root, 'models','bvlc_reference_caffenet','bvlc_reference_caffenet.caffemodel')
 		self.net = caffe.Net(model_def,model_weights,caffe.TEST)
 
 	def create_labels(self):
@@ -80,10 +81,10 @@ class Net:
 		
 
 	def loadsynset(self):
-		f = open(os.path.join(dic_root,"synset_cats"),"r")
+		f = open("gallery/synset_cats","r")
 		self.cats = f.read().splitlines()
 		f.close()
-		f = open(os.path.join(dic_root,"synset_dogs"),"r")
+		f = open("gallery/synset_dogs","r")
 		self.dogs = f.read().splitlines()
 		f.close()
 
@@ -287,11 +288,11 @@ def load_dataset(images_path, net, transformer):
 
 def make():
     n = Net()
-    img_path = "/home/gustavo/Documents/das/das/images/"
+    img_path = "../images/"
     labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
     labels = np.loadtxt(labels_file, str, delimiter='\t') 
     vectors, img_files = load_dataset(img_path, n.net, n.transformer)
-    img = "/home/gustavo/Documents/das/das/images/2b97481.jpg"
+    img = "../images/2b97481.jpg"
     KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=img_path, labels=labels)
     del vectors
     KNN.retrieve(n.predict_imageNet(img)) 
@@ -328,7 +329,7 @@ class Input:
 
 	def urlResolver(self,load):
 		image = urllib.URLopener()
-		path = os.path.join(dic_root,"0000001.jpg")
+		path = "gallery/0000001.jpg"
 		image.retrieve(load,path)
 		image.close()
 		self.fileResolver(path)
