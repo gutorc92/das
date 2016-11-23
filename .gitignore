@@ -91,7 +91,6 @@ ENV/
 bin/
 db.sqlite3
 das/gallery/migrations/
-images/
 include/
 local/
 man/
