@@ -1,0 +1,44 @@
+{% load staticfiles %}
+
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>OrganizAction</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" type="text/css" href="{% static 'style/index.css' %}" />
+</head>
+	<body>
+		<div id="search-column">
+			<button id="find-images" type="button" onclick="findImages();">Find Images</button>
+			<h1 id="tags-label">Tags</h1>
+			<div id="text-fields">
+				<div>
+					<input class="tag" type="text">
+				</div>
+			</div>
+			<button id="add-field" type="button" onclick="addField();">+</button>
+		</div>
+		
+		<div id="photos-column">
+			<div id="carousel">
+				<div id="left-arrow" onclick="changeMainImage('left');">
+					<img src="{% static 'images/left-arrow.png' %}">
+				</div>
+				<div id="carousel-images">
+					
+				</div>
+				<div id="right-arrow" onclick="changeMainImage('right');">
+					<img src="{% static 'images/right-arrow.png' %}">
+				</div>
+			</div>
+			<div id="photos"></div>
+		</div>
+	</body>
+	
+	<script type="text/javascript" src="{% static 'js/tags-action.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/display-area.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/carousel.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/request-images.js' %}"></script>
+</html>
