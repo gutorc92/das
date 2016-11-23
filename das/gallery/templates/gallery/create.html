@@ -8,18 +8,12 @@
 	  <!-- Tell the browser to be responsive to screen width -->
 	  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	  <link rel="stylesheet" type="text/css" href="{% static 'style/create.css' %}" />
+	  <link rel="shortcut icon" type="image/png" href="{% static 'images/organizAction-icon.png' %}"/>
+	  <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
 	</head>
 
 	<body>
-    	<div id="search-column">
-			<button id="find-images" type="button" onclick="findImages();">Find Images</button>
-			<h1 id="tags-label">Tags</h1>
-			<div id="text-fields">
-				<div>
-					<input class="tag" type="text">
-				</div>
-			</div>
-			<button id="add-field" type="button" onclick="addField();">+</button>
+    	<div id="folders-column">
 		</div>
 		
 		<div id="photos-column">

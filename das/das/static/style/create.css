@@ -1,50 +1,18 @@
 body {	
-	width: 95%;
-	height: 100%;
-	margin: auto;
+	width: 98vw;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
 	background-color: #16303D;
 }
 
-#search-column {
+#folders-column {
 	width: 20%;
 	height: 85%;
 	margin-top: 3em;
 	float: left;
 	text-align: center;
-}
-
-#find-images {
-	width: 20em;
-	height: 4em;
-	background-color: #F0F0F0;
-	font-family: "Courier New", Courier, monospace;
-}
-
-#tags-label {
-	margin-top: 2em;
-	color: #FFFFFF;
-	font-family: "Courier New", Courier, monospace;
-}
-
-.tag {
-	width: 10em;
-	height: 2em;
-	margin: 0.5em;
-	font-family: "Courier New", Courier, monospace;
-}
-
-.remove-field {
-	width: 3em;
-	height: 2.5em;
-	font-family: "Courier New", Courier, monospace;
-}
-
-#add-field {
-	width: 3em;
-	height: 3em;
-	margin-top: 1em;
-	background-color: #F0F0F0;
-	font-family: "Courier New", Courier, monospace;
 }
 
 #photos-column {
@@ -61,7 +29,7 @@ body {
 	height: 20%;
 	border-top-right-radius: 1em;
 	border-top-left-radius: 1em;
-	background-color: #F0F0F0;
+	background-color: rgba(135, 100, 32, 0.2);
 	position: relative;
 	overflow: hidden;
 }
@@ -116,7 +84,7 @@ body {
 	vertical-align: middle;
 	text-align: center;
 	position: relative;
-	font-family: "Courier New", Courier, monospace;
+	font-family: 'Baloo Bhaina', cursive;
 }
 
 #photos img {
