@@ -87,3 +87,14 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+bin/
+db.sqlite3
+das/gallery/migrations/
+images/
+include/
+local/
+man/
+pip-selfcheck.json
+share/
+
