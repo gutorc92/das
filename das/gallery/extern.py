@@ -3,120 +3,116 @@ import caffe
 import os
 import sys
 import cv2
-import urllib2
 import urllib
 from scipy import misc
 import h5py # to save/load data files
 import matplotlib.pyplot as plt
 
 
-home_dir = os.getenv("HOME")
-caffe_root = os.path.join(home_dir, "caffe")
+labels = []
+
+dic_root = "/home/gustavo/Documents/unb/das/trabalhofinal/das/gallery"
+caffe_root = "/home/gustavo/caffe"
+
+caffe.set_mode_cpu()
+
+model_def = os.path.join(caffe_root, 'models', 'bvlc_reference_caffenet','deploy.prototxt')
+model_weights = os.path.join(caffe_root, 'models','bvlc_reference_caffenet','bvlc_reference_caffenet.caffemodel')
+
+net = caffe.Net(model_def,      # defines the structure of the model
+                model_weights,  # contains the trained weights
+                caffe.TEST)  
+
+# load the mean ImageNet image (as distributed with Caffe) for subtraction
+mu = np.load(os.path.join(caffe_root, 'python','caffe','imagenet','ilsvrc_2012_mean.npy'))
+mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
+print 'mean-subtracted values:', zip('BGR', mu)
+
+# create transformer for the input called 'data'
+transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
+
+transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
+transformer.set_mean('data', mu)            # subtract the dataset-mean value in each channel
+transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
+transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
 
 
-class NetFace:
-	def __init__(self):
-		path = "gallery/haarcascade_frontalface_alt.xml"
-		self.classifier = cv2.CascadeClassifier(path)
-	def classifierImage(self,miniframe):
-		return self.classifier.detectMultiScale(miniframe)
+labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
+labels = np.loadtxt(labels_file, str, delimiter='\t')
 
-class Face:
-	def __init__(self,net=NetFace()):
-		self.net = net
-	
-	def detect(self,frame):
-		height, width, depth = frame.shape
+def load_dataset(images_path):
+    # Load/build a dataset of vectors (i.e. a big matrix) of probabilities
+    # from the ImageNet ILSVRC 2012 challenge using Caffe.
+    vectors_filename = os.path.join(images_path, 'vectors.h5')
 
-		# create grayscale version
-		grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	 
-		# equalize histogram
-		cv2.equalizeHist(grayscale, grayscale)
+    if os.path.exists(vectors_filename):
+        print 'Loading image signatures (probability vectors) from ' + vectors_filename
+        with h5py.File(vectors_filename, 'r') as f:
+            vectors = f['vectors'][()]
+            img_files = f['img_files'][()]
 
-		# detect objects
-		DOWNSCALE = 4
-		minisize = (frame.shape[1]/DOWNSCALE,frame.shape[0]/DOWNSCALE)
-		miniframe = cv2.resize(frame, minisize)
-		faces = self.net.classifierImage(miniframe)
-		#if len(faces)>0:
-			# print 'face detected!'
-		#	for i in faces:
-		#		x, y, w, h = [ v*DOWNSCALE for v in i ]
-		#		cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0))
-		#cv2.imshow('frame',frame)
-		#cv2.waitKey(0)
-		#print("Faces: ", len(faces))
-		return faces
+    else:
+        # Build a list of JPG files (change if you want other image types):
+        os.listdir(images_path)
+        img_files = [f for f in os.listdir(images_path) if (('jpg' in f) or ('JPG') in f)]
 
-class Net:
+        #print 'Loading all images to the memory and pre-processing them...'
+        
+        net_data_shape = net.blobs['data'].data.shape
+        train_images = np.zeros(([len(img_files)] + list(net_data_shape[1:])))
 
-	def __init__(self):
-		self.create_net()
-		self.create_mu()
-		self.create_transformer()
-		self.create_labels()
-		self.loadsynset()
+        for (f,n) in zip(img_files, range(len(img_files))):
+            print '%d %s'% (n,f)
+            image = caffe.io.load_image(os.path.join(images_path, f))
+            train_images[n] = transformer.preprocess('data', image)
+    
+        #print 'Extracting descriptor vector (classifying) for all images...'
+        vectors = np.zeros((train_images.shape[0],1000))
+        for n in range(0,train_images.shape[0],10): # For each batch of 10 images:
+            # This block can/should be parallelised!
+            #print 'Processing batch %d' % n
+            last_n = np.min((n+10, train_images.shape[0]))
 
-	def create_transformer(self):
-		self.transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
-		self.transformer.set_transpose('data', (2,0,1))
-		self.transformer.set_mean('data', self.mu)      
-		self.transformer.set_raw_scale('data', 255)      
-		self.transformer.set_channel_swap('data', (2,1,0)) 
-		
-	def create_mu(self):
-		self.mu = np.load(os.path.join(caffe_root, 'python','caffe','imagenet','ilsvrc_2012_mean.npy'))
-		self.mu = self.mu.mean(1).mean(1)  
+            net.blobs['data'].data[0:last_n-n] = train_images[n:last_n]
 
+            # perform classification
+            net.forward()
 
-	def create_net(self):
-		model_def = os.path.join(caffe_root, 'models', 'bvlc_reference_caffenet','deploy.prototxt')
-		model_weights = os.path.join(caffe_root, 'models','bvlc_reference_caffenet','bvlc_reference_caffenet.caffemodel')
-		self.net = caffe.Net(model_def,model_weights,caffe.TEST)
+            # obtain the output probabilities
+            vectors[n:last_n] = net.blobs['prob'].data[0:last_n-n]
+        
+        #print 'Saving descriptors and file indices to ' + vectors_filename
+        with h5py.File(vectors_filename, 'w') as f:
+            f.create_dataset('vectors', data=vectors)
+            f.create_dataset('img_files', data=img_files)
+    
+    return vectors, img_files
 
-	def create_labels(self):
-		labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
-		self.labels = np.loadtxt(labels_file, str, delimiter='\t') 
-		
+def predict_imageNet(image_filename):
+    image = caffe.io.load_image(image_filename)
+    net.blobs['data'].data[...] = transformer.preprocess('data', image)
 
-	def loadsynset(self):
-		f = open("gallery/synset_cats","r")
-		self.cats = f.read().splitlines()
-		f.close()
-		f = open("gallery/synset_dogs","r")
-		self.dogs = f.read().splitlines()
-		f.close()
+    # perform classification
+    net.forward()
 
+    # obtain the output probabilities
+    output_prob = net.blobs['prob'].data[0]
 
-	def predict_imageNet(self,image_filename):
-		image = caffe.io.load_image(image_filename)
-		self.net.blobs['data'].data[...] = self.transformer.preprocess('data', image)
+    # sort top five predictions from softmax output
+    top_inds = output_prob.argsort()[::-1][:5]
 
-		# perform classification
-		self.net.forward()
+    #plt.imshow(image)
+    #plt.axis('off')
 
-		# obtain the output probabilities
-		output_prob = self.net.blobs['prob'].data[0]
-
-		# sort top five predictions from softmax output
-		top_inds = output_prob.argsort()[::-1][:5]
-
-
-		predictions = zip(output_prob[top_inds], self.labels[top_inds])
-
-		return predictions
-
-	def result(self,img):
-		predictions = self.predict_imageNet(img)
-		total_dogs = 0
-		total_cats = 0
-		for per, cls in predictions:
-			if cls.split()[0] in self.cats:
-				total_cats += per
-			elif cls.split()[0] in self.dogs:
-				total_dogs += per		
-		return total_dogs*100,total_cats*100
+    #print 'probabilities and labels:'
+    #predictions = zip(output_prob[top_inds], labels[top_inds]) # showing only labels (skipping the index)
+    #for p in predictions:
+    #    print p
+    
+    # plt.figure(figsize=(15, 3))
+    # plt.plot(output_prob)
+    return output_prob
+>>>>>>> Files
 
 class NearestNeighbors:
     def __init__(self, K=10, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
@@ -163,12 +159,11 @@ class NearestNeighbors:
 
     def retrieve(self, x):
         # The next 3 lines are for debugging purposes:
-        plt.figure(figsize=(5, 1))
-        plt.plot(x)
-        plt.title('Query vector')
+        #plt.figure(figsize=(5, 1))
+        #plt.plot(x)
+        #plt.title('Query vector')
 
         nearest_neighbours = self.predict(x)
-
         for n in range(self.K):
             idx = nearest_neighbours[n]
         
@@ -180,113 +175,16 @@ class NearestNeighbors:
             # In the block below, instead of just showing the image in Jupyter notebook,
             # you can create a website showing results.
             image =  misc.imread(os.path.join(self.images_path, self.img_files[idx]))
-            plt.figure()
-            plt.imshow(image)
-            plt.axis('off')
             if self.labels.shape[0]==0:
-                plt.title('im. idx=%d' % idx)
+                print("Teste")
             else: # Show top label in the title, if possible:
                 top_inds = self.Xtr[idx].argsort()[::-1][:5]
-                plt.title('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
+                print('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
                 
-            # The next 3 lines are for debugging purposes:
-            plt.figure(figsize=(5, 1))
-            plt.plot(self.Xtr[idx])       
-            plt.title('Vector of the element ranked %d' % n)
-
-
-def get_hist(filename):
-    image =  misc.imread(filename)
-    image = image[::4,::4,:]
-    # Normalizing images:
-    im_norm = (image-image.mean())/image.std()
-    
-    # Computing a 10-bin histogram in the range [-e, +e] (1 standard deviationto 255 for each of the colours:
-    # (the first element [0] is the histogram, the second [1] is the array of bins.)
-    hist_red = np.histogram(im_norm[:,:,0], range=(-np.e,+np.e))[0] 
-    hist_green = np.histogram(im_norm[:,:,1], range=(-np.e,+np.e))[0]
-    hist_blue = np.histogram(im_norm[:,:,2], range=(-np.e,+np.e))[0]
-    # Concatenating them into a 30-dimensional vector:
-    histogram = np.concatenate((hist_red, hist_green, hist_blue)).astype(np.float)
-    return histogram/histogram.sum()
-
-def load_dataset_hist(images_path):
-    # Load/build a dataset of vectors (i.e. a big matrix) of RGB histograms.
-    vectors_filename = os.path.join(images_path, 'vectors_hist.h5')
-
-    if os.path.exists(vectors_filename):
-        print 'Loading image signatures (colour histograms) from ' + vectors_filename
-        with h5py.File(vectors_filename, 'r') as f:
-            vectors = f['vectors'][()]
-            img_files = f['img_files'][()]
-
-    else:
-        # Build a list of JPG files (change if you want other image types):
-        os.listdir(images_path)
-        img_files = [f for f in os.listdir(images_path) if (('jpg' in f) or ('JPG') in f)]
-
-        print 'Loading all images to the memory and pre-processing them...'
-        vectors = np.zeros((len(img_files), 30))
-        for (f,n) in zip(img_files, range(len(img_files))):
-            print '%d %s'% (n,f)
-            vectors[n] = get_hist(os.path.join(images_path, f))
-                    
-        print 'Saving descriptors and file indices to ' + vectors_filename
-        with h5py.File(vectors_filename, 'w') as f:
-            f.create_dataset('vectors', data=vectors)
-            f.create_dataset('img_files', data=img_files)
-    
-    return vectors, img_files
-
-def load_dataset(images_path, net, transformer):
-    # Load/build a dataset of vectors (i.e. a big matrix) of probabilities
-    # from the ImageNet ILSVRC 2012 challenge using Caffe.
-    vectors_filename = os.path.join(images_path, 'vectors.h5')
-
-    if os.path.exists(vectors_filename):
-        print 'Loading image signatures (probability vectors) from ' + vectors_filename
-        with h5py.File(vectors_filename, 'r') as f:
-            vectors = f['vectors'][()]
-            img_files = f['img_files'][()]
-
-    else:
-        # Build a list of JPG files (change if you want other image types):
-        os.listdir(images_path)
-        img_files = [f for f in os.listdir(images_path) if (('jpg' in f) or ('JPG') in f)]
-
-        print 'Loading all images to the memory and pre-processing them...'
-        
-        net_data_shape = net.blobs['data'].data.shape
-        train_images = np.zeros(([len(img_files)] + list(net_data_shape[1:])))
-
-        for (f,n) in zip(img_files, range(len(img_files))):
-            print '%d %s'% (n,f)
-            image = caffe.io.load_image(os.path.join(images_path, f))
-            train_images[n] = transformer.preprocess('data', image)
-    
-        print 'Extracting descriptor vector (classifying) for all images...'
-        vectors = np.zeros((train_images.shape[0],1000))
-        for n in range(0,train_images.shape[0],10): # For each batch of 10 images:
-            # This block can/should be parallelised!
-            print 'Processing batch %d' % n
-            last_n = np.min((n+10, train_images.shape[0]))
-
-            net.blobs['data'].data[0:last_n-n] = train_images[n:last_n]
-
-            # perform classification
-            net.forward()
-
-            # obtain the output probabilities
-            vectors[n:last_n] = net.blobs['prob'].data[0:last_n-n]
-        
-        print 'Saving descriptors and file indices to ' + vectors_filename
-        with h5py.File(vectors_filename, 'w') as f:
-            f.create_dataset('vectors', data=vectors)
-            f.create_dataset('img_files', data=img_files)
-    
-    return vectors, img_files
+           
 
 def make():
+<<<<<<< HEAD
     n = Net()
     img_path = "../images/"
     labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
@@ -361,3 +259,10 @@ class Output:
 			print("A probabilidade de haver felinos na imagem e de: {0}").format(str(cats))
 		else:
 			print("Nao ha felinos na imagem")
+=======
+    images_path = "/home/gustavo/Documents/das/images"
+    vectors, img_files = load_dataset(images_path)
+    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels) 
+    img = "/home/gustavo/Documents/das/das/2b97481.jpg"
+    KNN.retrieve(predict_imageNet(img))
+>>>>>>> Files
