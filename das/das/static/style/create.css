@@ -1,0 +1,156 @@
+body {
+	width: 98vw;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #16303D;
+}
+
+#folders-column {
+	width: 20%;
+	height: 85%;
+	margin-top: 3em;
+	float: left;
+	text-align: center;
+}
+
+.upload-image {
+	cursor: pointer;
+	display: block;
+  padding-left: 6em;
+  padding-bottom: 1em;
+}
+
+input {
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+form {
+	margin: 0;
+}
+
+button, p {
+	background: #16303D;
+	border-radius: 15px;
+	font-family: 'Baloo Bhaina', cursive;
+	font-weight: bold;
+	margin: auto;
+	padding: 0.7em 1.5em 0.4em 1.5em;
+	text-transform: uppercase;
+}
+
+#send-more-photos {
+	border: solid 2px #5CBC67;
+	color: #5CBC67;
+	cursor: pointer;
+	display: none;
+	margin-left: 3em;
+	margin-bottom: 2em;
+}
+
+.more-photos {
+	border: solid 2px #E69751;
+	color: #E69751;
+	cursor: pointer;
+	font-size: 0.8em;
+	margin-left: 4em;
+	margin-bottom: 2em;
+	width: 50%;
+}
+
+.categories {
+	color: #FFF;
+	cursor: pointer;
+	display: block;
+	font-family: 'Baloo Bhaina', cursive;
+	text-decoration: none;
+}
+
+.categories:before {
+	content: url('../images/folder.png');
+	display: inline-block;
+	padding-right: 0.5em;
+	vertical-align: middle;
+}
+
+#photos-column {
+	width: 70%;
+	height: 85%;
+	border-radius: 1em;
+	margin-top: 3em;
+	float: right;
+	background-color: #FFFFFF;
+}
+
+#carousel {
+	width: 100%;
+	height: 20%;
+	border-top-right-radius: 1em;
+	border-top-left-radius: 1em;
+	background-color: rgba(135, 100, 32, 0.2);
+	position: relative;
+	overflow: hidden;
+}
+
+#left-arrow, #right-arrow {
+	top: 45%;
+	width: 5%;
+	height: 100%;
+	position: absolute;
+	margin: 0;
+	z-index: 10;
+}
+
+#left-arrow img, #right-arrow img {
+	display: none;
+}
+
+#left-arrow:hover img, #right-arrow:hover img {
+	display: block;
+}
+
+#left-arrow {
+	left: 0;
+}
+
+#right-arrow {
+	right: 0;
+}
+
+#carousel-images {
+	height: 100%;
+	margin-top: 0.6em;
+	position: absolute;
+    white-space:nowrap;
+}
+
+#carousel-images img {
+	margin-right: 0.5em;
+	min-width: 50px;
+	border-radius: 1em;
+	opacity: 0.2;
+	-webkit-transition: opacity 1s ease-in-out;
+	transition: opacity 1s ease-in-out;
+}
+
+#carousel-images img.active {
+	opacity: 1;
+}
+
+#photos {
+	height: 80%;
+	vertical-align: middle;
+	text-align: center;
+	position: relative;
+	font-family: 'Baloo Bhaina', cursive;
+}
+
+#photos img {
+	border-radius: 1em;
+}

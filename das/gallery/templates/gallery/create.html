@@ -1,7 +1,65 @@
+{% load staticfiles %}
+
 <html>
-    <form action="{% url 'gallery:create' %}" enctype="multipart/form-data" method="POST" >
-        {% csrf_token %} 
-        {{ form }}
-        <button> Enviar </button>
-    </form>
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <title>OrganizAction</title>
+	  <!-- Tell the browser to be responsive to screen width -->
+	  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	  <link rel="stylesheet" type="text/css" href="{% static 'style/create.css' %}" />
+	  <link rel="shortcut icon" type="image/png" href="{% static 'images/organizAction-icon.png' %}"/>
+	  <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
+	</head>
+
+	<body>
+    <div id="folders-column">
+    	<form action="{% url 'gallery:create' %}" enctype="multipart/form-data"
+				method="POST" class="form-inline">
+
+				{% csrf_token %}
+			    {{ form }}
+
+	        <button id="send-more-photos">Enviar Nova(s) Foto(s)</button>
+		    </form>
+    	{% for category in categories %}
+    		<p class="categories">{{ category.name }}</p>
+			{% endfor %}
+		</div>
+
+		<div id="photos-column">
+			<div id="carousel">
+				<div id="left-arrow" onclick="changeMainImage('left');">
+					<img src="{% static 'images/left-arrow.png' %}">
+				</div>
+				<div id="carousel-images">
+
+				</div>
+				<div id="right-arrow" onclick="changeMainImage('right');">
+					<img src="{% static 'images/right-arrow.png' %}">
+				</div>
+			</div>
+			<div id="photos"></div>
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		var inputLabel = document.getElementsByTagName('LABEL');
+		inputLabel[0].innerHTML = "<p class='more-photos'>Adicionar + Foto(s)</p>";
+
+		var button = document.getElementById('send-more-photos');
+		function uploadedFiles() {
+			inputLabel[0].innerHTML = "";
+			button.style.display = 'block';
+		}
+
+		var input = document.getElementById('id_file_field');
+		input.onclick = uploadedFiles;
+
+	</script>
+
+	<script type="text/javascript" src="{% static 'js/tags-action.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/display-area.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/carousel.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/request-images.js' %}"></script>
 </html>

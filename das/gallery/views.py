@@ -5,7 +5,6 @@ from .forms import FileFieldForm
 from django.conf import settings
 from extern import *
 import os
-from os import walk
 
 path_img = os.path.join(settings.BASE_DIR, "images")
 
@@ -25,6 +24,7 @@ def create_gallery():
                                           path = os.path.join(path_img,file_name),
                                           category=category)
 
+
 class CreateGallery(View):
 
     def post(self, request):
@@ -34,18 +34,17 @@ class CreateGallery(View):
             handle_uploaded_file(files) 
             create_gallery()
             return self.get(request)
-
         else:
             return render(request, "gallery/create.html",{'form': form})
-     
+
     def get(self, request):
         form = FileFieldForm()
-        return render(request, "gallery/create.html",{'form': form})
-        
+        categories = Category.objects.all()
+        return render(request, "gallery/create.html",{'form': form, 'categories':categories})
+
 
 def create_categories():
    cats,  created = Category.objects.get_or_create(name="Cats")
    dogs,  created = Category.objects.get_or_create(name="Dogs")
    faces, created = Category.objects.get_or_create(name="Faces")
    return cats, dogs, faces
-# Create your views here.
