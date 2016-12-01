@@ -26,7 +26,7 @@ def create_gallery():
                                           category=category)
 
 def create_picture(file_name):
-    
+
     category_labels = get_category(path_img, os.path.join(path_img,file_name))
     nr_id, name = category_labels.split(" ", 1)
     category, created = Category.objects.get_or_create(nr_id=nr_id,name=name)
@@ -36,14 +36,13 @@ def create_picture(file_name):
                                       category=category)
 
 
-
 class CreateGallery(View):
 
     def post(self, request):
         files = request.FILES.getlist('file_field')
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(files) 
+            handle_uploaded_file(files)
             create_gallery()
             return self.get(request)
         else:
@@ -60,11 +59,13 @@ class AddPicture(View):
     def post(self, request):
         files = request.FILES.getlist('file_field')
         form = FileFieldForm(request.POST, request.FILES)
+
         if form.is_valid():
-            handle_uploaded_file(files) 
+            handle_uploaded_file(files)
             for f in files:
-                create_picture(f.name) 
+                create_picture(f.name)
             return redirect("gallery:create")
+
         else:
             return render(request, "gallery/create.html",{'form': form})
 
@@ -80,8 +81,11 @@ class ListPictures(View):
         category = Category.objects.get(id=id)
         text = ""
         for pic in category.pictures.all():
-            text += "'path':" + pic.path + ", " 
-        return JsonResponse({'pictures': text}, content_type="application/json") 
+            if category.pictures.all().count() > 1:
+                text += pic.path + ", "
+            else:
+                text += pic.path
+        return JsonResponse({'pictures': text}, content_type="application/json")
 
 
 def index(request):

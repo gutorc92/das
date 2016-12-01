@@ -23,7 +23,7 @@
 	        <button id="send-more-photos">Enviar Nova(s) Foto(s)</button>
 		    </form>
     	{% for category in categories %}
-    		<p class="categories">{{ category.name }}</p>
+    		<p class="categories" onclick="loadImages({{ category.id }});">{{ category.name }}</p>
 			{% endfor %}
 		</div>
 
@@ -58,7 +58,6 @@
 
 	</script>
 
-	<script type="text/javascript" src="{% static 'js/tags-action.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/display-area.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/carousel.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/request-images.js' %}"></script>
