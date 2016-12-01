@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 
 labels = []
 
-dic_root = "/home/gustavo/Documents/unb/das/trabalhofinal/das/gallery"
-caffe_root = "/home/gustavo/caffe"
+home_dir = os.getenv("HOME")
+caffe_root = os.path.join(home_dir, "caffe")
 
 caffe.set_mode_cpu()
 
@@ -21,7 +21,7 @@ model_weights = os.path.join(caffe_root, 'models','bvlc_reference_caffenet','bvl
 
 net = caffe.Net(model_def,      # defines the structure of the model
                 model_weights,  # contains the trained weights
-                caffe.TEST)  
+                caffe.TEST)
 
 # load the mean ImageNet image (as distributed with Caffe) for subtraction
 mu = np.load(os.path.join(caffe_root, 'python','caffe','imagenet','ilsvrc_2012_mean.npy'))
@@ -57,7 +57,7 @@ def load_dataset(images_path):
         img_files = [f for f in os.listdir(images_path) if (('jpg' in f) or ('JPG') in f)]
 
         #print 'Loading all images to the memory and pre-processing them...'
-        
+
         net_data_shape = net.blobs['data'].data.shape
         train_images = np.zeros(([len(img_files)] + list(net_data_shape[1:])))
 
@@ -65,7 +65,7 @@ def load_dataset(images_path):
             print '%d %s'% (n,f)
             image = caffe.io.load_image(os.path.join(images_path, f))
             train_images[n] = transformer.preprocess('data', image)
-    
+
         #print 'Extracting descriptor vector (classifying) for all images...'
         vectors = np.zeros((train_images.shape[0],1000))
         for n in range(0,train_images.shape[0],10): # For each batch of 10 images:
@@ -80,12 +80,12 @@ def load_dataset(images_path):
 
             # obtain the output probabilities
             vectors[n:last_n] = net.blobs['prob'].data[0:last_n-n]
-        
+
         #print 'Saving descriptors and file indices to ' + vectors_filename
         with h5py.File(vectors_filename, 'w') as f:
             f.create_dataset('vectors', data=vectors)
             f.create_dataset('img_files', data=img_files)
-    
+
     return vectors, img_files
 
 def predict_imageNet(image_filename):
@@ -108,11 +108,11 @@ def predict_imageNet(image_filename):
     #predictions = zip(output_prob[top_inds], labels[top_inds]) # showing only labels (skipping the index)
     #for p in predictions:
     #    print p
-    
+
     # plt.figure(figsize=(15, 3))
     # plt.plot(output_prob)
     return output_prob
->>>>>>> Files
+
 
 class NearestNeighbors:
     def __init__(self, K=10, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
@@ -127,23 +127,23 @@ class NearestNeighbors:
         """ X is N x D where each row is an example."""
         # the nearest neighbor classifier simply remembers all the training data
         self.Xtr = Xtr
-        
+
     def setK(self, K):
         """ K is the number of samples to be retrieved for each query."""
         self.K = K
 
     def setImagesPath(self,images_path):
         self.images_path = images_path
-        
+
     def setFilesList(self,img_files):
         self.img_files = img_files
 
     def setLabels(self,labels):
         self.labels = labels
-        
+
     def predict(self, x):
         """ x is a test (query) sample vector of 1 x D dimensions """
-    
+
         # Compare x with the training (dataset) vectors
         # using the L1 distance (sum of absolute value differences)
 
@@ -151,7 +151,7 @@ class NearestNeighbors:
         # distances = np.power(np.sum(np.power(np.abs(X-x),p), axis = 1), 1./p)
         distances = np.sum(np.abs(self.Xtr-x), axis = 1)
         # distances = 1-np.dot(X,x)
-    
+
         # plt.figure(figsize=(15, 3))
         # plt.plot(distances)
         # print np.argsort(distances)
@@ -166,12 +166,12 @@ class NearestNeighbors:
         nearest_neighbours = self.predict(x)
         for n in range(self.K):
             idx = nearest_neighbours[n]
-        
+
             # predictions = zip(self.Xtr[idx][top_inds], labels[top_inds]) # showing only labels (skipping the index)
             # for p in predictions:
             #     print p
-            
-            ## 
+
+            ##
             # In the block below, instead of just showing the image in Jupyter notebook,
             # you can create a website showing results.
             image =  misc.imread(os.path.join(self.images_path, self.img_files[idx]))
@@ -180,89 +180,12 @@ class NearestNeighbors:
             else: # Show top label in the title, if possible:
                 top_inds = self.Xtr[idx].argsort()[::-1][:5]
                 print('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
-                
-           
+
+
 
 def make():
-<<<<<<< HEAD
-    n = Net()
-    img_path = "../images/"
-    labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
-    labels = np.loadtxt(labels_file, str, delimiter='\t') 
-    vectors, img_files = load_dataset(img_path, n.net, n.transformer)
-    img = "../images/2b97481.jpg"
-    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=img_path, labels=labels)
-    del vectors
-    KNN.retrieve(n.predict_imageNet(img)) 
-
-class Input:
-
-	FACES = 1
-	PREDICTION = 2
-	def __init__(self, load=None):
-		self.img = None
-		if(load): self.resolve(load)
-
-	def resolve(self,load):
-		if(self.isFile(load)):
-			self.fileResolver(load)	
-		elif(self.isUrl(load)):
-			self.urlResolver(load)
-
-	def isFile(self,load):
-		return os.path.isfile(load)
-	def isUrl(self,load):
-		try:
-			urllib2.urlopen(load)
-			return True
-		except urllib2.HTTPError, e:
-			return False
-		except urllib2.URLError, e:
-			return False
-		return False
-			
-	def fileResolver(self,load):
-		self.img = cv2.imread(load)
-		self.load = load
-
-	def urlResolver(self,load):
-		image = urllib.URLopener()
-		path = "gallery/0000001.jpg"
-		image.retrieve(load,path)
-		image.close()
-		self.fileResolver(path)
-		return None
-	
-	def getImage(self,destination):
-		if(destination == self.FACES):
-			return self.img
-		else:
-			return self.load
-
-class Output:
-	
-	def outFaces(self,faces):
-		if(len(faces) > 0):
-			print("Foram detectadas {0} faces").format(str(len(faces)))
-			print("As coordendas das faces: ")
-			for face in faces:
-				print(face)
-		else:
-			print("Nao foram encontradas faces")
-	
-	def outAnimals(self,dogs,cats):
-		if(dogs > 0):
-			print("A probabilidade de haver caninos na imagem e de: {0}").format(str(dogs))
-		else:
-			print("Nao ha caninos na imagem")
-		if(cats > 0):
-			print("A probabilidade de haver felinos na imagem e de: {0}").format(str(cats))
-		else:
-			print("Nao ha felinos na imagem")
-=======
-    images_path = "/home/gustavo/Documents/das/images"
+    images_path = "../images"
     vectors, img_files = load_dataset(images_path)
-    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels) 
-    img = "/home/gustavo/Documents/das/das/2b97481.jpg"
+    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels)
+    img = "../images/2b97481.jpg"
     KNN.retrieve(predict_imageNet(img))
->>>>>>> Files
