@@ -3,22 +3,22 @@ var images;
 var currentImage;
 
 function centerImage(event) {
-	var image = event.srcElement || event.target;	
+	var image = event.srcElement || event.target;
 	var innerLeft = image.offsetLeft;
-	
+
 	var halfOuterWidth = document.getElementById('carousel').offsetWidth / 2;
 	var halfImageWidth = image.offsetWidth / 2;
-	
-	var outerLeft = halfOuterWidth - halfImageWidth; 
-	
+
+	var outerLeft = halfOuterWidth - halfImageWidth;
+
 	document.getElementById('carousel-images').style.left = (outerLeft - innerLeft) + 'px';
-	
+
 	if(previousImage != '') {
 		animation();
 	}
-	
+
 	changeOpacity(image);
-	
+
 	setTimeout(function() {
 		displayImage(image);
 	}, 1000);
@@ -31,31 +31,31 @@ function animation() {
 	document.getElementById('carousel-images').style.transition = 'left 1s ease-in-out';
 }
 
-function changeOpacity(image) {	
+function changeOpacity(image) {
 	if(previousImage != '') {
 		previousImage.classList.remove('active');
 	}
-	
+
 	image.className = 'active';
-	
+
 	previousImage = image;
 }
 
 function changeMainImage(arrow_position) {
-	images = document.getElementsByTagName('img'); 
+	images = document.getElementsByTagName('img');
 	var i = currentImageIndex = 1;
-	
+
 	while(i < images.length - 1) {
 		if(images[i].className == 'active') {
 			currentImageIndex = i;
 			break;
 		}
-		
+
 		else {
 			i++;
 		}
 	}
-	
+
 	if(arrow_position == 'left') {
 		// If the previous image is not the left arrow (images[0]), the new main image is the previous of the current one
 		if(currentImageIndex-1 != 0) {
@@ -66,7 +66,7 @@ function changeMainImage(arrow_position) {
 			clickAction(images[images.length-3]);
 		}
 	}
-	
+
 	else {
 		// If the next image is not the right arrow (images[lenght-1]), the new main image is the next of the current one
 		if(currentImageIndex+1 != images.length-2) {
@@ -86,7 +86,7 @@ function clickAction(element) {
 }
 
 document.onkeydown = keyboardArrows;
-function keyboardArrows(e){    
+function keyboardArrows(e){
 	e = e || window.event;
 	var key = e.which || e.keyCode;
 
@@ -94,15 +94,15 @@ function keyboardArrows(e){
         case 37:
 			changeMainImage('left');
             break;
-			
+
         case 39:
             changeMainImage('right');
             break;
-    }   
+    }
 }
 
 window.onresize = centerImageOnResize;
-function centerImageOnResize(e) {	
+function centerImageOnResize(e) {
 	clickAction(currentImage);
 }
 
@@ -113,11 +113,11 @@ function fitImageCarousel(image){
 
 	if(image.width >= image.height){
 		image.width = 150;
-		image.height = 100;
-	} 
-	
+		image.height = 85;
+	}
+
 	else {
-		image.height = 100;
+		image.height = 85;
 		image.width = image.height / aspectRatio;
 	}
 }
