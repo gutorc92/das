@@ -22,7 +22,7 @@ In order to run the program properly, it's necessary to assegure that the pc has
 
 The project tree has to be like:
 
-![Project Tree](https://raw.githubusercontent.com/wiki/das/project_tree.png) 
+![Project Tree](https://raw.githubusercontent.com/wiki/gutorc92/das/project_tree.png) 
 
 - Create the database: 
   - `$ python manage.py makemigrations gallery`
@@ -32,5 +32,6 @@ The project tree has to be like:
 ## Running the Project
 - Run in terminal:
   - `$ python manage.py runserver`
+- Enjoy the project!
   
 The project will run, by default, in `localhost:8000`
