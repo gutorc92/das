@@ -15,6 +15,55 @@ body {
 	text-align: center;
 }
 
+.upload-image {
+	cursor: pointer;
+	display: block;
+  padding-left: 6em;
+  padding-bottom: 1em;
+}
+
+input {
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+form {
+	margin: 0;
+}
+
+button, p {
+	background: #16303D;
+	border-radius: 15px;
+	font-family: 'Baloo Bhaina', cursive;
+	font-weight: bold;
+	margin: auto;
+	padding: 0.7em 1.5em 0.4em 1.5em;
+	text-transform: uppercase;
+}
+
+#send-more-photos {
+	border: solid 2px #5CBC67;
+	color: #5CBC67;
+	cursor: pointer;
+	display: none;
+	margin-left: 3em;
+	margin-bottom: 2em;
+}
+
+.more-photos {
+	border: solid 2px #E69751;
+	color: #E69751;
+	cursor: pointer;
+	font-size: 0.8em;
+	margin-left: 4em;
+	margin-bottom: 2em;
+	width: 50%;
+}
+
 .categories {
 	color: #FFF;
 	cursor: pointer;
