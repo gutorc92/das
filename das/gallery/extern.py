@@ -201,10 +201,14 @@ class NearestNeighbors:
             if self.labels.shape[0]==0:
                 print("Teste")
             else: # Show top label in the title, if possible:
-                top_inds = self.Xtr[idx].argsort()[::-1][:5]
+                top_inds = self.Xtr[idx].argsort()[::-1][:1]
                 print(top_inds)
                 print('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
 
+def get_category(images_path, img):
+    vectors, img_files = load_dataset(images_path)
+    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels)
+    KNN.retrieve(predict_imageNet(img))
 
 def make():
     images_path = "../images"

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views import View
+from django.http import JsonResponse
 from .models import *
 from .forms import FileFieldForm
 from django.conf import settings
@@ -50,7 +51,7 @@ class AddPicture(View):
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(files) 
-            create_gallery()
+            
             return self.get(request)
         else:
             return render(request, "gallery/create.html",{'form': form})
@@ -60,6 +61,17 @@ class AddPicture(View):
         categories = Category.objects.all()
         return render(request, "gallery/create.html",{'form': form, 'categories':categories})
 
+class ListPictures(View):
+
+    def get(self, request, id):
+        print(id)
+        category = Category.objects.get(id=id)
+        text = ""
+        for pic in category.pictures.all():
+            text += "'path':" + pic.path + ", " 
+        return JsonResponse({'pictures': text}, content_type="application/json") 
+
+
 def index(request):
     form = FileFieldForm()
     categories = Category.objects.all()
@@ -67,8 +79,3 @@ def index(request):
         return redirect("gallery:create")
     return render(request, 'gallery/index.html', {'form': form})
 
-def create_categories():
-   cats,  created = Category.objects.get_or_create(name="Cats")
-   dogs,  created = Category.objects.get_or_create(name="Dogs")
-   faces, created = Category.objects.get_or_create(name="Faces")
-   return cats, dogs, faces
