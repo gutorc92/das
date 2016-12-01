@@ -14,7 +14,7 @@
 
 	<body>
     <div id="folders-column">
-    	<form action="{% url 'gallery:create' %}" enctype="multipart/form-data"
+    	<form action="{% url 'gallery:newpicture' %}" enctype="multipart/form-data"
 				method="POST" class="form-inline">
 
 				{% csrf_token %}

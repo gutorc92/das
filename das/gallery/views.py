@@ -25,6 +25,17 @@ def create_gallery():
                                           path = os.path.join("static",file_name),
                                           category=category)
 
+def create_picture(file_name):
+    
+    category_labels = get_category(path_img, os.path.join(path_img,file_name))
+    nr_id, name = category_labels.split(" ", 1)
+    category, created = Category.objects.get_or_create(nr_id=nr_id,name=name)
+    print(category.pk)
+    p, created = Picture.objects.get_or_create(name=file_name,
+                                      path = os.path.join("static",file_name),
+                                      category=category)
+
+
 
 class CreateGallery(View):
 
@@ -51,8 +62,9 @@ class AddPicture(View):
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(files) 
-            
-            return self.get(request)
+            for f in files:
+                create_picture(f.name) 
+            return redirect("gallery:create")
         else:
             return render(request, "gallery/create.html",{'form': form})
 

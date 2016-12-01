@@ -130,7 +130,7 @@ def predict_imageNet(image_filename):
 
 
 class NearestNeighbors:
-    def __init__(self, K=20, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
+    def __init__(self, K=1, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
         # Setting defaults
         self.K = K
         self.Xtr = Xtr
@@ -165,11 +165,6 @@ class NearestNeighbors:
         # p = 1.
         # distances = np.power(np.sum(np.power(np.abs(X-x),p), axis = 1), 1./p)
         distances = np.sum(np.abs(self.Xtr-x), axis = 1)
-        print "Distances before sorting"
-        print len(distances)
-        print "The bigger"
-        print distances[94]
-        print distances
         # distances = 1-np.dot(X,x)
 
         # plt.figure(figsize=(15, 3))
@@ -184,9 +179,7 @@ class NearestNeighbors:
         #plt.title('Query vector')
         greater_idx = -1 
         nearest_neighbours = self.predict(x)
-        print nearest_neighbours
-        print "Len"
-        print len(nearest_neighbours)
+        result = ""
         for n in range(self.K):
             idx = nearest_neighbours[n]
 
@@ -203,16 +196,21 @@ class NearestNeighbors:
             else: # Show top label in the title, if possible:
                 top_inds = self.Xtr[idx].argsort()[::-1][:1]
                 print(top_inds)
-                print('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
+                result = labels[top_inds[0]]
+                print('%s   im. idx=%d' % (labels[top_inds[0]], idx))
+        return result
 
 def get_category(images_path, img):
     vectors, img_files = load_dataset(images_path)
     KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels)
-    KNN.retrieve(predict_imageNet(img))
+    r =  KNN.retrieve(predict_imageNet(img))
+    print r
+    return r
 
 def make():
-    images_path = "../images"
+    images_path = "/home/gustavo/Documents/das/images/"
     vectors, img_files = load_dataset(images_path)
     KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels)
-    img = "../images/2b97481.jpg"
-    KNN.retrieve(predict_imageNet(img))
+    img = "/home/gustavo/Documents/das/das/2b97481.jpg"
+    r = KNN.retrieve(predict_imageNet(img))
+    print r
