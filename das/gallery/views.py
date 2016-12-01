@@ -32,7 +32,7 @@ class CreateGallery(View):
         files = request.FILES.getlist('file_field')
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(files) 
+            handle_uploaded_file(files)
             create_gallery()
             return self.get(request)
         else:
@@ -50,8 +50,8 @@ class AddPicture(View):
         files = request.FILES.getlist('file_field')
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(files) 
-            
+            handle_uploaded_file(files)
+
             return self.get(request)
         else:
             return render(request, "gallery/create.html",{'form': form})
@@ -68,8 +68,11 @@ class ListPictures(View):
         category = Category.objects.get(id=id)
         text = ""
         for pic in category.pictures.all():
-            text += "'path':" + pic.path + ", " 
-        return JsonResponse({'pictures': text}, content_type="application/json") 
+            if category.pictures.all().count() > 1:
+                text += pic.path + ", "
+            else:
+                text += pic.path
+        return JsonResponse({'pictures': text}, content_type="application/json")
 
 
 def index(request):
