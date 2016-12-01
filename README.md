@@ -16,6 +16,14 @@ In order to run the program properly, it's necessary to assegure that the pc has
   - `$ pip install -r requirements.txt`
 - Go to the app: 
   - `$ cd das` ('das' in this case is another folder inside the previous 'das' folder)
+- Open the project in your favorite text editor:
+  - Create a folder called 'images' in the same level as 'das' and 'gallery'
+  - Create a folder called 'static' inside the 'images' folder previously created
+
+The project tree has to be like:
+
+![Project Tree](https://raw.githubusercontent.com/wiki/das/project_tree.png) 
+
 - Create the database: 
   - `$ python manage.py makemigrations gallery`
 - Migrate the data to schema: 
