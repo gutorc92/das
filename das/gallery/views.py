@@ -7,7 +7,7 @@ from django.conf import settings
 from extern import *
 import os
 
-path_img = os.path.join(settings.BASE_DIR, "images")
+path_img = os.path.join(settings.BASE_DIR, "images/static")
 
 def handle_uploaded_file(files):
     for f in files:
@@ -22,7 +22,7 @@ def create_gallery():
         category, created = Category.objects.get_or_create(nr_id=nr_id,name=name)
         print(category.pk)
         p, created = Picture.objects.get_or_create(name=file_name,
-                                          path = os.path.join(path_img,file_name),
+                                          path = os.path.join("static",file_name),
                                           category=category)
 
 

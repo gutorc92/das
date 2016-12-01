@@ -124,4 +124,4 @@ STATIC_ROOT = 'static'
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "das/static"), )
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "das/static"), os.path.join(BASE_DIR, "images/static/") ]
