@@ -88,6 +88,21 @@ def load_dataset(images_path):
     
     return vectors, img_files
 
+def creating_gallery(image_filename):
+    image = caffe.io.load_image(image_filename)
+    net.blobs['data'].data[...] = transformer.preprocess('data', image)
+
+    # perform classification
+    net.forward()
+
+    # obtain the output probabilities
+    output_prob = net.blobs['prob'].data[0]
+
+    # sort top five predictions from softmax output
+    top_inds = output_prob.argsort()[::-1][:1]
+
+    return labels[top_inds]
+
 def predict_imageNet(image_filename):
     image = caffe.io.load_image(image_filename)
     net.blobs['data'].data[...] = transformer.preprocess('data', image)
@@ -112,10 +127,9 @@ def predict_imageNet(image_filename):
     # plt.figure(figsize=(15, 3))
     # plt.plot(output_prob)
     return output_prob
->>>>>>> Files
 
 class NearestNeighbors:
-    def __init__(self, K=10, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
+    def __init__(self, K=20, Xtr=[], images_path='Photos/', img_files=[], labels=np.empty(0)):
         # Setting defaults
         self.K = K
         self.Xtr = Xtr
@@ -150,6 +164,11 @@ class NearestNeighbors:
         # p = 1.
         # distances = np.power(np.sum(np.power(np.abs(X-x),p), axis = 1), 1./p)
         distances = np.sum(np.abs(self.Xtr-x), axis = 1)
+        print "Distances before sorting"
+        print len(distances)
+        print "The bigger"
+        print distances[94]
+        print distances
         # distances = 1-np.dot(X,x)
     
         # plt.figure(figsize=(15, 3))
@@ -162,8 +181,11 @@ class NearestNeighbors:
         #plt.figure(figsize=(5, 1))
         #plt.plot(x)
         #plt.title('Query vector')
-
+        greater_idx = -1 
         nearest_neighbours = self.predict(x)
+        print nearest_neighbours
+        print "Len"
+        print len(nearest_neighbours)
         for n in range(self.K):
             idx = nearest_neighbours[n]
         
@@ -179,90 +201,16 @@ class NearestNeighbors:
                 print("Teste")
             else: # Show top label in the title, if possible:
                 top_inds = self.Xtr[idx].argsort()[::-1][:5]
+                print(top_inds)
                 print('%s   im. idx=%d' % (labels[top_inds[0]][10:], idx))
+            
+        
                 
            
 
 def make():
-<<<<<<< HEAD
-    n = Net()
-    img_path = "../images/"
-    labels_file = os.path.join(caffe_root, 'data','ilsvrc12','synset_words.txt')
-    labels = np.loadtxt(labels_file, str, delimiter='\t') 
-    vectors, img_files = load_dataset(img_path, n.net, n.transformer)
-    img = "../images/2b97481.jpg"
-    KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=img_path, labels=labels)
-    del vectors
-    KNN.retrieve(n.predict_imageNet(img)) 
-
-class Input:
-
-	FACES = 1
-	PREDICTION = 2
-	def __init__(self, load=None):
-		self.img = None
-		if(load): self.resolve(load)
-
-	def resolve(self,load):
-		if(self.isFile(load)):
-			self.fileResolver(load)	
-		elif(self.isUrl(load)):
-			self.urlResolver(load)
-
-	def isFile(self,load):
-		return os.path.isfile(load)
-	def isUrl(self,load):
-		try:
-			urllib2.urlopen(load)
-			return True
-		except urllib2.HTTPError, e:
-			return False
-		except urllib2.URLError, e:
-			return False
-		return False
-			
-	def fileResolver(self,load):
-		self.img = cv2.imread(load)
-		self.load = load
-
-	def urlResolver(self,load):
-		image = urllib.URLopener()
-		path = "gallery/0000001.jpg"
-		image.retrieve(load,path)
-		image.close()
-		self.fileResolver(path)
-		return None
-	
-	def getImage(self,destination):
-		if(destination == self.FACES):
-			return self.img
-		else:
-			return self.load
-
-class Output:
-	
-	def outFaces(self,faces):
-		if(len(faces) > 0):
-			print("Foram detectadas {0} faces").format(str(len(faces)))
-			print("As coordendas das faces: ")
-			for face in faces:
-				print(face)
-		else:
-			print("Nao foram encontradas faces")
-	
-	def outAnimals(self,dogs,cats):
-		if(dogs > 0):
-			print("A probabilidade de haver caninos na imagem e de: {0}").format(str(dogs))
-		else:
-			print("Nao ha caninos na imagem")
-		if(cats > 0):
-			print("A probabilidade de haver felinos na imagem e de: {0}").format(str(cats))
-		else:
-			print("Nao ha felinos na imagem")
-=======
     images_path = "/home/gustavo/Documents/das/images"
     vectors, img_files = load_dataset(images_path)
     KNN = NearestNeighbors(Xtr=vectors, img_files=img_files, images_path=images_path, labels=labels) 
     img = "/home/gustavo/Documents/das/das/2b97481.jpg"
     KNN.retrieve(predict_imageNet(img))
->>>>>>> Files
