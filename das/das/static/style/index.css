@@ -1,4 +1,4 @@
-body {	
+body {
 	width: 100%;
 	height: 100%;
 	margin: auto;
@@ -31,6 +31,10 @@ body {
 	margin: auto;
 }
 
+.upload-image {
+	cursor: pointer;
+}
+
 .button-action {
 	border-top: solid 3px #FFF;
 	border-bottom: solid 3px #FFF;
@@ -57,6 +61,14 @@ body {
 	display: inline-block;
 	vertical-align: middle;
 	padding-left: 0.5em;
+}
+
+.observation {
+	color: #FFF;
+	font-family: 'Baloo Bhaina', cursive;
+  font-weight: bold;
+  padding-left: 6em;
+  text-align: center;
 }
 
 input {

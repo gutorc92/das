@@ -1,4 +1,4 @@
-body {	
+body {
 	width: 98vw;
 	height: 100vh;
 	margin: 0;
@@ -13,6 +13,21 @@ body {
 	margin-top: 3em;
 	float: left;
 	text-align: center;
+}
+
+.categories {
+	color: #FFF;
+	cursor: pointer;
+	display: block;
+	font-family: 'Baloo Bhaina', cursive;
+	text-decoration: none;
+}
+
+.categories:before {
+	content: url('../images/folder.png');
+	display: inline-block;
+	padding-right: 0.5em;
+	vertical-align: middle;
 }
 
 #photos-column {
@@ -72,7 +87,7 @@ body {
 	border-radius: 1em;
 	opacity: 0.2;
 	-webkit-transition: opacity 1s ease-in-out;
-	transition: opacity 1s ease-in-out; 
+	transition: opacity 1s ease-in-out;
 }
 
 #carousel-images img.active {

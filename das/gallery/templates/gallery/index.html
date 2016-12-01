@@ -22,20 +22,21 @@
 				<img src="{% static 'images/organizAction.png' %}">
 			</div>
 			<div class="button-action row">
-				<form action="{% url 'gallery:create' %}" enctype="multipart/form-data" 
+				<form action="{% url 'gallery:create' %}" enctype="multipart/form-data"
 					method="POST" class="form-inline">
-					
-					{% csrf_token %} 
+
+					{% csrf_token %}
 				    {{ form }}
 
-		        	<button>Enviar Arquivo(s)</button>
+		        <button>Enviar Arquivo(s)</button>
+            <p class="observation">* Máximo de 100 fotos</p>
 			    </form>
 			</div>
 		</div>
 	</body>
 	<script type="text/javascript">
 		var inputLabel = document.getElementsByTagName('LABEL');
-		inputLabel[0].innerHTML = "<img src='/static/images/upload-image.png'>";
+		inputLabel[0].innerHTML = "<img class='upload-image' src='/static/images/upload-image.png'>";
 
 		function uploadedFiles() {
 			inputLabel[0].innerHTML = "<img src='/static/images/ok.png'>";
