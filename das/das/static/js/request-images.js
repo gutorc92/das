@@ -11,8 +11,9 @@ function loadImages(id) {
     if (this.readyState == 4 && this.status == 200) {
 			var jsonResponse = JSON.parse(this.responseText);
 			var imageSource = jsonResponse["pictures"];
+			var sources = imageSource.split(', ');
 
-			openImages(imageSource);
+			openImages(sources);
    	}
   };
 
@@ -27,13 +28,18 @@ function openImages(source) {
 		carousel.removeChild(carousel.firstChild);
 	}
 
-	var categoryImage = document.createElement('img');
-	categoryImage.src = "/" + source;
-	categoryImage.onload = centerImage;
-	categoryImage.onclick = centerImage;
+	if(source.length > 1) {
+		source.length--;
+	}
 
-	fitImageCarousel(categoryImage);
-	carousel.appendChild(categoryImage);
+	for(i = 0; i < source.length; i++) {
+		var categoryImage = document.createElement('img');
+		categoryImage.src = "/" + source[i];
+		categoryImage.onclick = centerImage;
+
+		fitImageCarousel(categoryImage);
+		carousel.appendChild(categoryImage);
+	}
 
 	allImages = document.getElementsByTagName('img');
 	clickAction(allImages[1]);
