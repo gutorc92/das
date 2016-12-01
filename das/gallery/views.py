@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from .models import *
 from .forms import FileFieldForm
@@ -42,6 +42,30 @@ class CreateGallery(View):
         categories = Category.objects.all()
         return render(request, "gallery/create.html",{'form': form, 'categories':categories})
 
+
+class AddPicture(View):
+
+    def post(self, request):
+        files = request.FILES.getlist('file_field')
+        form = FileFieldForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(files) 
+            create_gallery()
+            return self.get(request)
+        else:
+            return render(request, "gallery/create.html",{'form': form})
+
+    def get(self, request):
+        form = FileFieldForm()
+        categories = Category.objects.all()
+        return render(request, "gallery/create.html",{'form': form, 'categories':categories})
+
+def index(request):
+    form = FileFieldForm()
+    categories = Category.objects.all()
+    if categories.count() > 0:
+        return redirect("gallery:create")
+    return render(request, 'gallery/index.html', {'form': form})
 
 def create_categories():
    cats,  created = Category.objects.get_or_create(name="Cats")
