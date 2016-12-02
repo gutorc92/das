@@ -9,7 +9,7 @@ In order to run the program properly, it's necessary to assegure that the pc has
   
 ## Installation
 - Clone the repository: 
-  - `$ https://www.github.com/gutorc92/das.git`
+  - `$ git clone https://www.github.com/gutorc92/das.git`
 - Get inside the cloned folder: 
   - `$ cd das`
 - Install the requirements: 
