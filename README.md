@@ -35,3 +35,7 @@ The project tree has to be like:
 - Enjoy the project!
   
 The project will run, by default, in `localhost:8000`
+
+**PS. It's not necessary to add images in the folder**. The images will be automatically loaded after you run the program and select the desired images, from your pc, on the appropriate location in the page. As shown in this example:
+
+![How to Load Images](https://raw.githubusercontent.com/wiki/gutorc92/das/load_images.png) 
